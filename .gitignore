@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# OV project-specific
+CLAUDE.md
+.superpowers/
+.env
+.ov/
+project.json
+docs/
+rough.*
+rough*
+idea/
