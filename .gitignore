@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -216,3 +215,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# OV project-specific
+CLAUDE.md
+.superpowers/
+.env
+.ov/
+project.json
+docs/
+rough.*
+rough*
+idea/
