@@ -1,0 +1,16 @@
+name: sched-fixture
+kind: connector
+layer: 1
+description: Test fixture — a schedule-triggered connector that records invocations.
+produces:
+  - RawRecord:sched-fixture
+consumes: []
+triggers:
+  schedule: "1h"
+scopes:
+  - raw:write:sched-fixture
+runtime:
+  entrypoint: module.py:run
+  agent: false
+  secrets: []
+  budget: null
