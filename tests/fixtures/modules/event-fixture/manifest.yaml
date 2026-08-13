@@ -1,0 +1,18 @@
+name: event-fixture
+kind: transform
+layer: 2
+description: Test fixture — an event-triggered transform that records topic and payload.
+produces:
+  - Satellite
+consumes:
+  - RawRecord:sched-fixture
+triggers:
+  event: "raw.landed:sched-fixture"
+scopes:
+  - raw:read:sched-fixture
+  - ontology:propose:Satellite
+runtime:
+  entrypoint: module.py:run
+  agent: false
+  secrets: []
+  budget: null
