@@ -6,9 +6,12 @@ Three assertions once core v0 exists (Phase 1):
 (c) judgment rows (inferred:*, asserted:human) and status_events survive
     replay untouched.
 """
+
 import pytest
 
-pytestmark = pytest.mark.skip(reason="Phase 1: activates when core v0 (ontology log + projections) exists")
+pytestmark = pytest.mark.skip(
+    reason="Phase 1: activates when core v0 (ontology log + projections) exists"
+)
 
 
 def test_projections_rebuild_from_log() -> None:
