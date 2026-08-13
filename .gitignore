@@ -218,6 +218,7 @@ __marimo__/
 
 # OV project-specific
 CLAUDE.md
+.claude/
 .superpowers/
 .env
 .ov/
