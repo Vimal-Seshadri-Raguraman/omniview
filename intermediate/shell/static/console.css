@@ -1,0 +1,109 @@
+/* OmniView intermediate console — committed dark ops identity (approved mockup). */
+:root {
+  --ground: #0a0e17;
+  --surface: #111826;
+  --surface-2: #0d1420;
+  --line: #1e2a3c;
+  --line-soft: #16202f;
+  --text: #d9e2ef;
+  --text-dim: #66738a;
+  --text-faint: #3d4a60;
+  --accent: #e4a94f;
+  --live: #46c08a;
+  --error: #d4746a;
+  --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font-family: var(--sans); font-size: 14px; line-height: 1.5;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 64px; }
+header {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 18px 0 14px; border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: var(--ground); z-index: 5;
+  margin-bottom: 18px;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand b { font-size: 16px; letter-spacing: 0.14em; }
+.brand span {
+  color: var(--accent); font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+}
+.status { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.chip {
+  font-family: var(--mono); font-size: 11.5px; padding: 3px 10px;
+  border: 1px solid var(--line); border-radius: 3px;
+  color: var(--text-dim); background: var(--surface-2); white-space: nowrap;
+}
+.chip .ok { color: var(--live); }
+.band {
+  display: grid; grid-template-columns: 120px 1fr;
+  border: 1px solid var(--line); border-radius: 4px;
+  margin-bottom: 14px; background: var(--surface-2); overflow: hidden;
+}
+.rail {
+  padding: 14px; border-right: 1px solid var(--line-soft);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.rail .lnum { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text-faint); }
+.rail .lname {
+  font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.rail .lstate {
+  margin-top: auto; padding-top: 10px; font-family: var(--mono);
+  font-size: 11px; color: var(--text-faint);
+  display: flex; align-items: center; gap: 6px;
+}
+.band.live { background: var(--surface); }
+.band.live .lnum { color: var(--accent); }
+.band.live .lstate { color: var(--live); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); flex: none; }
+.band.live .dot { background: var(--live); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) { .band.live .dot { animation: none; } }
+.bay {
+  padding: 12px; display: flex; flex-wrap: wrap; gap: 10px;
+  min-height: 86px; align-content: flex-start;
+}
+.empty-copy {
+  align-self: center; color: var(--text-faint);
+  font-family: var(--mono); font-size: 12px; padding: 8px 6px;
+}
+.card {
+  flex: 1 1 300px; max-width: 100%; border: 1px solid var(--line);
+  border-radius: 3px; background: var(--ground);
+  display: flex; flex-direction: column;
+}
+.card-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-bottom: 1px solid var(--line-soft);
+}
+.card-head .pname { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+.card-head .mirrors {
+  margin-left: auto; font-family: var(--mono); font-size: 10.5px;
+  color: var(--text-dim); border: 1px solid var(--line);
+  border-radius: 3px; padding: 1px 7px; white-space: nowrap;
+}
+.card-body { padding: 10px 12px; font-family: var(--mono); font-size: 12.5px; }
+.card-body .panel-error { color: var(--error); margin: 0; }
+.card-foot {
+  margin-top: auto; padding: 5px 10px; border-top: 1px solid var(--line-soft);
+  font-family: var(--mono); font-size: 10.5px; color: var(--text-faint);
+  display: flex; justify-content: space-between; gap: 10px;
+}
+.foot-note {
+  margin-top: 28px; color: var(--text-faint); font-family: var(--mono);
+  font-size: 11px; border-top: 1px solid var(--line-soft); padding-top: 12px;
+}
+@media (max-width: 640px) {
+  .band { grid-template-columns: 1fr; }
+  .rail {
+    flex-direction: row; align-items: baseline; gap: 10px;
+    border-right: 0; border-bottom: 1px solid var(--line-soft);
+  }
+  .rail .lstate { margin-top: 0; margin-left: auto; padding-top: 0; }
+}
