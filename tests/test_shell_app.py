@@ -77,3 +77,24 @@ def test_raising_panel_contained_not_500() -> None:
 def test_healthz_counts_panels() -> None:
     body = make_client().get("/healthz").json()
     assert body == {"status": "ok", "panels": 1}
+
+
+def test_settings_defaults(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from intermediate.shell.__main__ import load_settings
+
+    for var in ("OV_SHELL_HOST", "OV_SHELL_PORT", "OV_PANELS_DIR", "OV_MODULES_DIR"):
+        monkeypatch.delenv(var, raising=False)
+    settings = load_settings()
+    assert settings.host == "127.0.0.1"
+    assert settings.port == 8080
+    assert settings.panels_dir == Path("intermediate/panels")
+    assert settings.modules_dir == Path("modules")
+
+
+def test_settings_from_env(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from intermediate.shell.__main__ import load_settings
+
+    monkeypatch.setenv("OV_SHELL_PORT", "9999")
+    monkeypatch.setenv("OV_PANELS_DIR", "/tmp/panels")
+    assert load_settings().port == 9999
+    assert load_settings().panels_dir == Path("/tmp/panels")
