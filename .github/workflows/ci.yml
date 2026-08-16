@@ -23,13 +23,13 @@ jobs:
           pip install -r requirements.txt black mypy flake8 types-PyYAML
 
       - name: black --check
-        run: black --check lib core sdk tests
+        run: black --check lib core sdk intermediate tests
 
       - name: mypy
-        run: mypy lib core sdk
+        run: mypy lib core sdk intermediate
 
       - name: flake8
-        run: flake8 --max-line-length 100 lib core sdk tests
+        run: flake8 --max-line-length 100 lib core sdk intermediate tests
 
       - name: pytest
         run: python -m pytest -v

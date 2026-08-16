@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OmniView Intermediate Console</title>
+  <link rel="stylesheet" href="/static/console.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand"><b>OMNIVIEW</b><span>Intermediate Console</span></div>
+      <div class="status">
+        <span class="chip">shell <span class="ok">&#9679; up</span></span>
+        <span class="chip">panels: {{ panel_count }} docked</span>
+      </div>
+    </header>
+    <main>
+      {% for band in bands %}
+      <section class="band {% if band.panels %}live{% endif %}">
+        <div class="rail">
+          <span class="lnum">{{ band.num }}</span>
+          <span class="lname">{{ band.name }}</span>
+          <span class="lstate"><span class="dot"></span>{% if band.panels %}live{% else %}empty{% endif %}</span>
+        </div>
+        <div class="bay">
+          {% for docked in band.panels %}
+          <div class="card">
+            <div class="card-head">
+              <span class="pname">{{ docked.panel.name }}</span>
+              <span class="mirrors">mirrors: {{ docked.panel.mirrors }}</span>
+            </div>
+            <div class="card-body">{{ docked.fragment }}</div>
+            <div class="card-foot">
+              <span>{{ docked.panel.description }}</span>
+              <span>{% if docked.panel.data_source %}poll: {{ docked.panel.poll_seconds }}s{% else %}poll: &mdash; (no data source){% endif %}</span>
+            </div>
+          </div>
+          {% else %}
+          <div class="empty-copy">&#9617; {{ band.empty_copy }}</div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endfor %}
+    </main>
+    <p class="foot-note">bands render L5 &rarr; L1 &middot; panels dock via panel.yaml &middot; refusals, never warnings</p>
+  </div>
+</body>
+</html>
