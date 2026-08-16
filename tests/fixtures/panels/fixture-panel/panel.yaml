@@ -1,0 +1,8 @@
+name: fixture-panel
+mirrors: layer:L1
+order: 10
+description: Test fixture — renders a static fragment naming its panel.
+data:
+  source: null
+  poll: 5
+entrypoint: panel.py:render
