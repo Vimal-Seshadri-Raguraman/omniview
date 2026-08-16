@@ -10,9 +10,11 @@ offboarding is undocking, not erasure.
 """
 
 import argparse
+import shutil
 import sys
 from datetime import date
 from pathlib import Path
+from typing import Callable
 
 import yaml
 
@@ -189,6 +191,52 @@ def scaffold_module(
     return list(files)
 
 
+def retire_module(
+    name: str,
+    modules_dir: Path,
+    assume_yes: bool,
+    confirm: Callable[[str], str] = input,
+) -> Path:
+    """Undock a module: move its folder to modules_dir/.retired/<name>-<date>.
+
+    The append-only ledger is never touched — the retired module's raw
+    records, observations, and provenance remain forever. Re-dock by
+    moving the folder back.
+
+    Args:
+        name: The docked module's name.
+        modules_dir: The modules directory it lives in.
+        assume_yes: Skip the interactive confirmation.
+        confirm: Injected prompt function (tests stub this).
+
+    Returns:
+        The retirement destination path.
+
+    Raises:
+        DockError: Unknown module, destination collision, or declined
+            confirmation.
+    """
+    folder = modules_dir / name
+    if not folder.is_dir():
+        raise DockError(f"No module folder '{folder}' found — nothing to retire")
+    destination = modules_dir / ".retired" / f"{name}-{date.today():%Y%m%d}"
+    if destination.exists():
+        raise DockError(
+            f"Retirement destination '{destination}' already exists — "
+            "move or rename it first"
+        )
+    if not assume_yes:
+        answer = confirm(
+            f"Retire '{name}'? Its folder moves to {destination}; the ledger "
+            "keeps every record it ever produced. [y/N] "
+        )
+        if answer.strip().lower() not in ("y", "yes"):
+            raise DockError(f"Retirement of '{name}' declined")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(folder), str(destination))
+    return destination
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint. Returns 0 on success, 2 on refusal."""
     parser = argparse.ArgumentParser(
@@ -204,14 +252,27 @@ def main(argv: list[str] | None = None) -> int:
     trigger_group.add_argument("--event", help='e.g. "raw.landed:<source>"')
     new.add_argument("--modules-dir", default=DEFAULT_MODULES_DIR)
     new.add_argument("--dry-run", action="store_true")
+    retire = sub.add_parser("retire", help="Undock a module (ledger untouched)")
+    retire.add_argument("name")
+    retire.add_argument("--modules-dir", default=DEFAULT_MODULES_DIR)
+    retire.add_argument("--yes", action="store_true")
     args = parser.parse_args(argv)
 
-    trigger: dict[str, str]
-    if args.event:
-        trigger = {"event": args.event}
-    else:
-        trigger = {"schedule": args.schedule or DEFAULT_CONNECTOR_SCHEDULE}
     try:
+        if args.command == "retire":
+            destination = retire_module(
+                name=args.name,
+                modules_dir=Path(args.modules_dir),
+                assume_yes=args.yes,
+            )
+            print(f"Retired '{args.name}' -> {destination}")
+            print("The ledger keeps every record it produced; re-dock by moving back.")
+            return 0
+        trigger: dict[str, str]
+        if args.event:
+            trigger = {"event": args.event}
+        else:
+            trigger = {"schedule": args.schedule or DEFAULT_CONNECTOR_SCHEDULE}
         written = scaffold_module(
             name=args.name,
             kind=args.kind,

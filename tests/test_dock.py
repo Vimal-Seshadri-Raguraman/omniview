@@ -101,3 +101,85 @@ def test_cli_new_exit_codes(tmp_path: Path) -> None:
     ]
     assert main(argv) == 0
     assert main(argv) == 2  # second run refused: already exists
+
+
+def test_retire_moves_folder_out_of_discovery(tmp_path: Path) -> None:
+    from core.dock import retire_module
+
+    modules_dir = tmp_path / "modules"
+    scaffold_module(
+        name="test-feed",
+        kind="connector",
+        layer=1,
+        trigger={"schedule": "2h"},
+        modules_dir=modules_dir,
+        dry_run=False,
+    )
+    dest = retire_module("test-feed", modules_dir, assume_yes=True)
+    assert not (modules_dir / "test-feed").exists()
+    assert dest.is_dir() and dest.parent == modules_dir / ".retired"
+    assert load_via_registry(modules_dir, tmp_path) == []
+
+
+def test_retire_leaves_ledger_untouched(tmp_path: Path) -> None:
+    from core.dock import retire_module
+
+    modules_dir = tmp_path / "modules"
+    scaffold_module(
+        name="test-feed",
+        kind="connector",
+        layer=1,
+        trigger={"schedule": "2h"},
+        modules_dir=modules_dir,
+        dry_run=False,
+    )
+    store = OntologyStore(str(tmp_path / "ledger.db"))
+    store.land_raw("test-feed", b"payload", "test-raw")
+    assert store.count_rows("raw_records") == 1
+    retire_module("test-feed", modules_dir, assume_yes=True)
+    assert store.count_rows("raw_records") == 1  # offboarding is undocking
+
+
+def test_retire_unknown_module_refused(tmp_path: Path) -> None:
+    from core.dock import retire_module
+
+    with pytest.raises(DockError, match="nothing to retire"):
+        retire_module("ghost", tmp_path / "modules", assume_yes=True)
+
+
+def test_retire_declined_confirmation_refused(tmp_path: Path) -> None:
+    from core.dock import retire_module
+
+    modules_dir = tmp_path / "modules"
+    scaffold_module(
+        name="test-feed",
+        kind="connector",
+        layer=1,
+        trigger={"schedule": "2h"},
+        modules_dir=modules_dir,
+        dry_run=False,
+    )
+    with pytest.raises(DockError, match="declined"):
+        retire_module("test-feed", modules_dir, assume_yes=False, confirm=lambda _: "n")
+    assert (modules_dir / "test-feed").exists()
+
+
+def test_cli_retire_exit_codes(tmp_path: Path) -> None:
+    modules_dir = str(tmp_path / "modules")
+    assert (
+        main(
+            [
+                "new",
+                "test-feed",
+                "--kind",
+                "connector",
+                "--layer",
+                "1",
+                "--modules-dir",
+                modules_dir,
+            ]
+        )
+        == 0
+    )
+    assert main(["retire", "test-feed", "--modules-dir", modules_dir, "--yes"]) == 0
+    assert main(["retire", "test-feed", "--modules-dir", modules_dir, "--yes"]) == 2
