@@ -183,3 +183,28 @@ def test_cli_retire_exit_codes(tmp_path: Path) -> None:
     )
     assert main(["retire", "test-feed", "--modules-dir", modules_dir, "--yes"]) == 0
     assert main(["retire", "test-feed", "--modules-dir", modules_dir, "--yes"]) == 2
+
+
+def test_new_refuses_traversal_name(tmp_path: Path) -> None:
+    """scaffold_module rejects path traversal names like '../evil'."""
+    modules_dir = tmp_path / "modules"
+    with pytest.raises(DockError, match="kebab-case"):
+        scaffold_module(
+            name="../evil",
+            kind="connector",
+            layer=1,
+            trigger={"schedule": "2h"},
+            modules_dir=modules_dir,
+            dry_run=False,
+        )
+    # Verify nothing was created outside modules dir
+    assert not (tmp_path / "evil").exists()
+
+
+def test_retire_refuses_traversal_name(tmp_path: Path) -> None:
+    """retire_module rejects path traversal names like '../evil'."""
+    from core.dock import retire_module
+
+    modules_dir = tmp_path / "modules"
+    with pytest.raises(DockError, match="kebab-case"):
+        retire_module(name="../evil", modules_dir=modules_dir, assume_yes=True)

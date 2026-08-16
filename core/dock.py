@@ -10,6 +10,7 @@ offboarding is undocking, not erasure.
 """
 
 import argparse
+import re
 import shutil
 import sys
 from datetime import date
@@ -25,6 +26,7 @@ from core.registry import KIND_LEGAL_LAYERS, ManifestError, Registry
 DEFAULT_MODULES_DIR = "modules"
 DEFAULT_CONNECTOR_SCHEDULE = "2h"
 _VALIDATION_DB = ":memory:"
+_NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]*")
 
 _CONNECTOR_TEMPLATE = '''"""{name} — L1 connector (scaffolded by core.dock; edit me)."""
 
@@ -98,6 +100,23 @@ class DockError(Exception):
     """A dock operation was refused; the message names the violated rule."""
 
 
+def _validate_name(name: str) -> None:
+    """Validate module name format; refuse path traversal and illegal characters.
+
+    Args:
+        name: The proposed module name.
+
+    Raises:
+        DockError: If name does not match kebab-case pattern [a-z0-9][a-z0-9-]*,
+            preventing path traversal and ensuring safe directory names.
+    """
+    if not _NAME_RE.fullmatch(name):
+        raise DockError(
+            f"Module name '{name}' must be kebab-case ([a-z0-9][a-z0-9-], "
+            "starting with alphanumeric)"
+        )
+
+
 def _build_manifest(
     name: str, kind: str, layer: int, trigger: dict[str, str]
 ) -> dict[str, object]:
@@ -157,6 +176,7 @@ def scaffold_module(
         DockError: On refusal — folder exists, illegal kind/layer, or the
             scaffold itself fails registry validation.
     """
+    _validate_name(name)
     if kind not in KIND_LEGAL_LAYERS:
         raise DockError(f"Unknown kind '{kind}' (legal: {sorted(KIND_LEGAL_LAYERS)})")
     if layer not in KIND_LEGAL_LAYERS[kind]:
@@ -216,6 +236,7 @@ def retire_module(
         DockError: Unknown module, destination collision, or declined
             confirmation.
     """
+    _validate_name(name)
     folder = modules_dir / name
     if not folder.is_dir():
         raise DockError(f"No module folder '{folder}' found — nothing to retire")
